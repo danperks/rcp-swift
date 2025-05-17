@@ -91,7 +91,7 @@ To run the example, open the ToDo app project and build it. Make sure the Cursor
 
 ## Documentation
 
-For more detailed documentation, see the [Integration Guide](Sources/RCPClient/Documentation.docc/Integration.md).
+For more detailed documentation, see the [Integration Guide](RCPClient/Sources/RCPClient/Documentation.docc/Integration.md).
 
 ## Requirements
 
@@ -100,4 +100,4 @@ For more detailed documentation, see the [Integration Guide](Sources/RCPClient/D
 
 ## License
 
-This project is available under the MIT license. See the LICENSE file for more info.
+This project is available under the MIT license. See the LICENSE file for more info. 

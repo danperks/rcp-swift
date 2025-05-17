@@ -10,15 +10,20 @@ let package = Package(
     products: [
         .library(
             name: "RCPClient",
-            targets: ["RCPClient"]),
+            targets: ["RCPClient"]
+        ),
     ],
     dependencies: [],
     targets: [
         .target(
             name: "RCPClient",
-            dependencies: []),
+            dependencies: [],
+            path: "RCPClient/Sources/RCPClient"
+        ),
         .testTarget(
             name: "RCPClientTests",
-            dependencies: ["RCPClient"]),
+            dependencies: ["RCPClient"],
+            path: "RCPClient/Tests/RCPClientTests"
+        )
     ]
 ) 
