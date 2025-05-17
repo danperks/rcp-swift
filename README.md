@@ -100,4 +100,93 @@ For more detailed documentation, see the [Integration Guide](RCPClient/Sources/R
 
 ## License
 
-This project is available under the MIT license. See the LICENSE file for more info. 
+This project is available under the MIT license. See the LICENSE file for more info.
+
+## Integration Details
+
+### Using `withRCP`
+
+`withRCP` is a convenience `View` extension that performs the following tasks:
+
+1. Instantiates an `RCPClient` with the supplied server URL and application name.
+2. Stores the client in an `@StateObject` called `RCPManager`.
+3. Injects the manager into the SwiftUI environment, allowing descendant views to
+   • send structured log messages (`rcpManager.info(_:)`, `rcpManager.debug(_:)`, etc.)  
+   • publish custom runtime events  
+   • obtain direct access to the live `RCPClient` instance when necessary.
+
+Because `withRCP` is implemented as a `ViewModifier`, it can be attached to any
+view. In practice, it should be applied near the root of the hierarchy (for
+example, to the view presented by `WindowGroup` or to `ContentView`) so that the
+`RCPManager` environment object is available application-wide.
+
+```swift
+@main
+struct MyApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .withRCP(
+                    serverURLString: "ws://localhost:9876", // port on which Cursor is listening
+                    appName: "My SwiftUI App"
+                )
+        }
+    }
+}
+```
+
+### Marking Views as Inspectable
+
+Any view can be made discoverable from the Cursor IDE by applying the
+`rcpInspectable` modifier:
+
+```swift
+Text(todo.title)
+    .rcpInspectable(
+        id: "todo-\(todo.id)",               // a stable identifier
+        metadata: [                           // optional, JSON-serialisable metadata
+            "title": todo.title,
+            "completed": todo.isCompleted
+        ]
+    )
+```
+
+In debug builds, tapping an inspectable view sends an `uiElementPicked` event to
+Cursor, which is then surfaced in the IDE as a runtime element.
+
+### Logging and Event Reporting
+
+`RCPManager` is a thin wrapper around `RCPClient` that exposes convenience
+methods for the standard log levels:
+
+```swift
+rcpManager.debug("Text changed …")
+rcpManager.info("Todo added")
+rcpManager.warn("Validation failed")
+rcpManager.error("Network error: \(error)")
+```
+
+Custom events can be dispatched through `RCPClient` or by adding additional
+helpers to `RCPManager` as required by your application.
+
+### End-to-End Example (`/ToDo`)
+
+The *ToDo* sample application demonstrates a complete integration:
+
+* **`ToDoApp.swift`** establishes an `RCPManager` and connects to the server at
+  launch.
+* **`ContentView.swift`**
+  * logs user interactions (adding, toggling, and deleting Todos);
+  * annotates interactive views with `rcpInspectable` so they can be selected
+    from within Cursor.
+
+Build and run the sample while Cursor is listening on the specified WebSocket
+port. Logged messages and selected UI elements will appear in the IDE in real
+-time.
+
+### Relationship to the Protocol Specification
+
+The document [`rcp.md`](./rcp.md) describes the underlying Runtime Context
+Protocol in detail, including the handshake sequence and message formats. The
+Swift implementation abstracts these details, but the specification is provided
+for reference and for developers who may need to implement custom runtimes. 
